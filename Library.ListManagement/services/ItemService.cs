@@ -15,6 +15,9 @@ namespace ListManagement.services
         private List<Item> items;
         private ListNavigator<Item> listNav;
         private string userData;
+        private JsonSerializerSettings serializerSettings
+           = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
+        private string persistencePath;
 
         static private ItemService instance;
         public List<Item> Items
@@ -24,12 +27,26 @@ namespace ListManagement.services
                 return items;
             }
         }
-
-        public IEnumerable<Item> IncompleteItems
+        public bool ShowComplete { get; set; }
+        public string Query { get; set; }
+        public IEnumerable<Item> FilteredItems
         {
             get
             {
-                return Items.Where(i => !((i as Task)?.IsCompleted ?? true));
+                var incompleteItems = Items.Where(i =>
+                (!ShowComplete && !((i as Task)?.IsCompleted ?? true)) //incomplete only
+                || ShowComplete);
+                //show complete (all)
+
+                var searchResults = incompleteItems.Where(i => string.IsNullOrWhiteSpace(Query)
+                //there is no query
+                || (i?.Name?.ToUpper()?.Contains(Query.ToUpper()) ?? false)
+                //i is any item and its name contains the query
+                || (i?.Description?.ToUpper()?.Contains(Query.ToUpper()) ?? false)
+                //or i is any item and its description contains the query
+                || ((i as Appointment)?.Attendees?.Select(t => t.ToUpper())?.Contains(Query.ToUpper()) ?? false));
+                //or i is an appointment and has the query in the attendees list
+                return searchResults;
             }
         }
 
@@ -48,7 +65,26 @@ namespace ListManagement.services
         private ItemService()
         {
             items = new List<Item>();
-            listNav = new ListNavigator<Item>(items, 5);
+
+            persistencePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\SaveData.json";
+            if (File.Exists(persistencePath))
+            {
+                try
+                {
+                    var state = File.ReadAllText(persistencePath);
+                    if (state != null)
+                    {
+                        items = JsonConvert.DeserializeObject<List<Item>>(state, serializerSettings) ?? new List<Item>();
+                    }
+                }
+                catch (Exception e)
+                {
+                    File.Delete(persistencePath);
+                    items = new List<Item>();
+                }
+            }
+
+            listNav = new ListNavigator<Item>(FilteredItems, 2);
         }
 
         public void Add(Item i)
@@ -63,35 +99,13 @@ namespace ListManagement.services
 
         public void Save()
         {
-            var persistencePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            userData = JsonConvert.SerializeObject(Items);
-            if (File.Exists(persistencePath + "/userdata.json"))
-            {
-                File.Delete(persistencePath + "/userdata.json");
-            }
-            using (FileStream fs = File.Create(persistencePath + "/userdata.json"))
-            {
-               fs.Write(UnicodeEncoding.UTF8.GetBytes(userData));
-            }
 
-        }
-
-        public void Load()
-        {
-            var persistencePath = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            if (File.Exists(persistencePath + "/userdata.json"))
+            var listJson = JsonConvert.SerializeObject(Items, serializerSettings);
+            if (File.Exists(persistencePath))
             {
-                var userSavedData = File.ReadAllText(persistencePath + "/userdata.json"); 
-                var savedData = JsonConvert.DeserializeObject<List<Item>>(userSavedData);
-                foreach (var ito in savedData)
-                { 
-                    Console.WriteLine(ito);
-                }
+                File.Delete(persistencePath);
             }
-            else
-            {
-                Console.WriteLine("No previous data detected");
-            }
+            File.WriteAllText(persistencePath, listJson);
         }
 
         public Dictionary<object, Item> GetPage()
