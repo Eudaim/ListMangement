@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 using ListManagement.interfaces;
+
 
 namespace ListManagement.models
 {
-        public class Item : IItem
+   
+    public class Item : IItem
         {
             private string _name;
             public string Name
@@ -22,10 +24,14 @@ namespace ListManagement.models
                 }
             }
             public string Description { get; set; }
+
+            public int ID { get; set; }
+            public bool Priority { get; set; } = false;
             public override string ToString()
             {
                 return $"{Name} {Description}";
             }
+
         }
   
    

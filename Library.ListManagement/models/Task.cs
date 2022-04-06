@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ListManagement.models;
 
-namespace ListManagement
+namespace ListManagement.models
 {
     public class Task : Item
     {
