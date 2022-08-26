@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ListManagement;
 using ListManagement.models;
 using ListManagement.helpers;
@@ -62,7 +61,7 @@ namespace ListManagement
                             itemService.Add(nextTask);
                             PrintMenu();
                             break;
-                        case 2:
+                        case 3:
                             Console.WriteLine("Choose Task You Want to Delete \n");
                             for (int i = 0; i < Tasks.Count(); i++)
                             {
@@ -82,7 +81,63 @@ namespace ListManagement
                                 }
                             }
                             break;
-                        case 3:
+                        case 2:
+                            Appointment nextAppointment = new Appointment();
+                            Console.Write("Please Enter Name of Appointment: ");
+                            nextAppointment.Name = Console.ReadLine();
+                            Console.Write("Please Enter Appointment Description: ");
+                            nextAppointment.Description = Console.ReadLine();
+                            Console.Write("Please Enter Appointment start date: ");
+                            while (true)
+                            {
+                                try
+                                {
+                                    nextAppointment.Start = DateTime.Parse(Console.ReadLine());
+                                    if (nextAppointment.Start < currentTime)
+                                    {
+                                        throw new Exception();
+                                    }
+                                    break;
+                                }
+
+                                catch (System.FormatException)
+                                {
+                                    Console.WriteLine("\n Invalid Format. Try Again.\n");
+                                    continue;
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine("\n Error. Please Enter a Valid Date\n");
+                                }
+                            }
+                            Console.Write("Please Enter Appointment stop date: ");
+                            while (true)
+                            {
+                                try
+                                {
+                                    nextAppointment.End = DateTime.Parse(Console.ReadLine());
+                                    if (nextAppointment.End < currentTime && nextAppointment.Start > nextAppointment.End)
+                                    {
+                                        throw new Exception();
+                                    }
+                                    break;
+                                }
+
+                                catch (System.FormatException)
+                                {
+                                    Console.WriteLine("\n Invalid Format. Try Again.\n");
+                                    continue;
+                                }
+                                catch (Exception e)
+                                {
+                                    Console.WriteLine("\n Error. Please Enter a Valid Date\n");
+                                }
+                            }
+                            Console.WriteLine("\n\n Appointment has been added \n \n");
+                            itemService.Add(nextAppointment);
+                            PrintMenu();
+                            break;
+                        case 4:
                             Console.WriteLine("Choose Task You Want to Edit \n");
                             for (int i = 0; i < itemService.Items.Count(); i++)
                             {
@@ -134,49 +189,70 @@ namespace ListManagement
                                 Console.WriteLine("\n Invalid Input\n");
                             }
                             break;
-                        case 4:
-                            Console.WriteLine("What Task Would you like to Complete?");
-                            for (int i = 0; i < Tasks.Count(); i++)
+                        case 5:
                             {
-                                Console.WriteLine($"[{i}] {Tasks[i].Name} : {Tasks[i].Description}  Due Date: {Tasks[i].DeadLine}");
-                            }
-                            if (int.TryParse(Console.ReadLine(), out userNum))
-                            {
-
-                                if (userNum > Tasks.Count() || userNum < 0)
+                                //Complete Task
+                                Console.WriteLine("Which item should I complete?");
+                                if (int.TryParse(Console.ReadLine(), out int selection))
                                 {
-                                    Console.WriteLine("\n Task Does Not Exist\n");
+                                    var selectedItem = itemService.Items[selection - 1] as Task;
+
+                                    if (selectedItem != null)
+                                    {
+                                        selectedItem.IsCompleted = true;
+                                    }
                                 }
                                 else
                                 {
-                                    Tasks[userNum].IsCompleted = true;
-                                    Console.WriteLine("Task Marked for Completion");
+                                    Console.WriteLine("Sorry, I can't find that item!");
                                 }
                             }
                             break;
-                        case 5:
-                            break;
                         case 6:
-                            var userPageInput = string.Empty;
-                            while (userPageInput != "E")
+                            itemService.ShowComplete = false;
+                            var userSelection = string.Empty;
+                            while (userSelection != "e")
                             {
                                 foreach (var item in itemService.GetPage())
                                 {
                                     Console.WriteLine(item);
                                 }
-                                userPageInput = Console.ReadLine();
-                                switch (userPageInput)
+                                userSelection = Console.ReadLine();
+
+                                if (userSelection == "N")
                                 {
-                                    case "n":
-                                        itemService.NextPage();
-                                        break;
-                                    case "p":
-                                        itemService.PreviousPage();
-                                        break;
+                                    itemService.NextPage();
                                 }
+                                else if (userSelection == "P")
+                                {
+                                    itemService.PreviousPage();
+                                }
+                                
                             }
                             break;
                         case 7:
+                            var userPageInput = string.Empty;
+                            while (userPageInput != "e")
+                            {
+                                foreach (var item in itemService.GetPage())
+                                {
+                                    Console.WriteLine(item);
+                                }
+                                foreach (var ito in itemService.Items)
+                                    Console.WriteLine(ito);
+                                userPageInput = Console.ReadLine();
+
+                                if (userPageInput == "N")
+                                {
+                                    itemService.NextPage();
+                                }
+                                else if (userPageInput == "P")
+                                {
+                                    itemService.PreviousPage();
+                                }
+                            }
+                            break;
+                        case 8:
                             var userSearchString = string.Empty;
                             Console.WriteLine("Enter A Search String"); 
                             userSearchString = Console.ReadLine();
@@ -188,16 +264,12 @@ namespace ListManagement
                         case 9:
                             itemService.Save();
                             break;
-                        case 10:
-                            itemService.Load();
-                            break;
                         case 0:
                             Console.WriteLine("\n Exiting....\n");
                             break;
                         default:
                             Console.WriteLine("\n Error. Try Again\n");
-                            break;
-
+                            break; 
                     };
             }
 
@@ -205,15 +277,15 @@ namespace ListManagement
         public static void PrintMenu()
         {
             Console.WriteLine("1. Create a new task.");
-            Console.WriteLine("2. Delete an existing task.");
-            Console.WriteLine("3. Edit an existing task.");
-            Console.WriteLine("4. Complete a task.");
-            Console.WriteLine("5. List all outstading (not complete) task.");
-            Console.WriteLine("6. List all task.");
-            Console.WriteLine("7. Search Task");
-            Console.WriteLine("8. Search Attendes in Appointments");
+            Console.WriteLine("2. Create a new Appointment");
+            Console.WriteLine("3. Delete an existing task.");
+            Console.WriteLine("4. Edit an existing task.");
+            Console.WriteLine("5. Complete a task.");
+            Console.WriteLine("6. List all outstading (not complete) task.");
+            Console.WriteLine("7. List all task.");
+            Console.WriteLine("8. Search Task");
             Console.WriteLine("9. Save");
-            Console.WriteLine("10. Load");
+            Console.WriteLine("10. List Appoinments");
             Console.WriteLine("0. Exit.");
             Console.WriteLine("\n \n");
 

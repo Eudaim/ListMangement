@@ -2,25 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using ListManagement.helpers;
 using ListManagement.models;
 using Newtonsoft.Json;
 using System.IO;
+using System.Collections.ObjectModel;
+
 
 namespace ListManagement.services
 {
     public class ItemService
     {
-        private List<Item> items;
+        private ObservableCollection<Item> items;
+        // private List<Item> items;
         private ListNavigator<Item> listNav;
         private string userData;
+        private int size = 1;
         private JsonSerializerSettings serializerSettings
            = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All };
         private string persistencePath;
 
         static private ItemService instance;
-        public List<Item> Items
+        public ObservableCollection<Item> Items
         {
             get
             {
@@ -64,32 +67,22 @@ namespace ListManagement.services
 
         private ItemService()
         {
-            items = new List<Item>();
+            items = new ObservableCollection<Item>();
 
             persistencePath = $"{Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}\\SaveData.json";
-            if (File.Exists(persistencePath))
-            {
-                try
-                {
-                    var state = File.ReadAllText(persistencePath);
-                    if (state != null)
-                    {
-                        items = JsonConvert.DeserializeObject<List<Item>>(state, serializerSettings) ?? new List<Item>();
-                    }
-                }
-                catch (Exception e)
-                {
-                    File.Delete(persistencePath);
-                    items = new List<Item>();
-                }
-            }
+
 
             listNav = new ListNavigator<Item>(FilteredItems, 2);
         }
 
         public void Add(Item i)
         {
+            if (i.ID <= 0)
+            {
+                i.ID = nextID;
+            }
             items.Add(i);
+
         }
 
         public void Remove(Item i)
@@ -130,6 +123,17 @@ namespace ListManagement.services
         public Dictionary<object, Item> PreviousPage()
         {
             return listNav.GoBackward();
+        }
+        private int nextID
+        {
+            get
+            {
+                if (Items.Any())
+                {
+                    return Items.Select(i => i.ID).Max() + 1;
+                }
+                return 1;
+            }
         }
     }
 }

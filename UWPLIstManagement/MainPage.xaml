@@ -1,0 +1,85 @@
+﻿<Page
+    x:Class="UWPLIstManagement.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UWPLIstManagement"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <local:BooleanToVisibilityConverter x:Key="boolstring"></local:BooleanToVisibilityConverter>
+        <local:BooleanToCompleteConverter x:Key="completestring"></local:BooleanToCompleteConverter>
+    </Page.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="1*"></RowDefinition>
+            <RowDefinition Height="25*"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+                <ColumnDefinition Width="10*"></ColumnDefinition>
+                <ColumnDefinition Width="1*"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Click="saveClick" Grid.Column="0" Content="Save" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <Button Click="loadClick" Grid.Column="1" Content="Load" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
+            <SearchBox Grid.Column="2" x:Name="search" QueryChanged="search_QueryChanged"></SearchBox>
+            <Button Grid.Column="3" Content="Search" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
+        </Grid>
+        <Grid Grid.Row="1">
+            <ListBox x:Name="SearchlistBox" ItemsSource="{Binding Path=Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" SelectedItem="{Binding Path=SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <Grid Grid.Column="0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                    <RowDefinition></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBlock FontWeight="ExtraBold" Text="{Binding Path=Name}"  Grid.Row="0"></TextBlock>
+                                <TextBlock Text="{Binding Path=Description}"  Grid.Row="1"></TextBlock>
+                                <TextBlock Text="{Binding Path=Deadline}"  Grid.Row="2"></TextBlock>
+                                <TextBlock Text="{Binding Path=starttime}"  Grid.Row="3"></TextBlock>
+                                <TextBlock Text="{Binding Path=endtime}" Grid.Row="4"></TextBlock>
+                                <TextBlock Text="{Binding Path=attendees}" Grid.Row="5"></TextBlock>
+                                <TextBlock FontWeight="Bold" Text="{Binding Priority, Converter={StaticResource boolstring}}" Grid.Row="6"></TextBlock>
+                                <TextBlock FontWeight="Bold" Text="{Binding IsCompleted, Converter={StaticResource completestring}}" Grid.Row="7"></TextBlock>
+                            </Grid>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+                <ColumnDefinition></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Add Task" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="AddToDoClick"></Button>
+            <Button Grid.Column="1" Content="Edit Task" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="EditTodoClick"></Button>
+            <Button Grid.Column="2" Content="Add Appointment" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="AddAppointmentClick"></Button>
+            <Button Grid.Column="3" Content="Edit Appointment" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="EditAppointmentClick"></Button>
+            <Button Grid.Column="4" Content="Sort By Priority" Click="sortPriority" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
+            <Button Grid.Column="5" Content="Complete" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="completeClick"></Button>
+            <Button Grid.Column="6" Content="DELETE" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Click="DeleteItem"></Button>
+        </Grid>
+    </Grid>
+</Page>
